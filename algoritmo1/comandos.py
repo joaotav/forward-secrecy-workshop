@@ -1,6 +1,10 @@
 import hmac, hashlib, socket
 from cryptography.fernet import Fernet
 
+''' Esse arquivo define algumas funções úteis para
+os exemplos sobre Perfect Forward Secrecy e Post-Compromise
+Security '''
+
 TAM_PAYLOAD = 512
 
 def criptografar(mensagem, chave):
@@ -116,6 +120,7 @@ def notify(destino, nonce, lista_grupos, chave):
 
 def conectar(PORTA, ID_CLIENTE):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     try:
         sock.connect((socket.gethostname(), PORTA)) # Conecta com o servidor na porta 5555
         sock.send(bytes(adicionar_padding(ID_CLIENTE), 'utf-8')) # Informa o ID do cliente
