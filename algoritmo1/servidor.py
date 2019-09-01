@@ -72,7 +72,7 @@ def main():
     mensagens_pendentes = defaultdict(list) # Estrutura para armazenar as mensagens pendentes
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     sock.bind((socket.gethostname(), PORTA)) # Define endereço e porta do socket
     sock.listen() # Aguarda conexões no endereço especificado
 

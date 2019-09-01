@@ -6,6 +6,7 @@ from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIF
 def main():
     nonce_cliente = 0
     sock = conectar(PORTA, ID_CLIENTE) # Conecta-se com o servidor no IP local e na PORTA escolhida
+    sock.send(bytes(adicionar_padding(ID_CLIENTE), 'utf-8')) # Informa o ID do cliente
     resposta = remover_padding(sock.recv(TAM_PAYLOAD)) # Recebe a resposta do servidor
     print(resposta)
     comando, nonce, grupo, mensagem = extrair_dados(sock.recv(TAM_PAYLOAD), CHAVE_SECRETA) # Recebe a resposta do servidor

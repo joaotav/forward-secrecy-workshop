@@ -123,7 +123,7 @@ def conectar(PORTA, ID_CLIENTE):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     try:
         sock.connect((socket.gethostname(), PORTA)) # Conecta com o servidor na porta 5555
-        sock.send(bytes(adicionar_padding(ID_CLIENTE), 'utf-8')) # Informa o ID do cliente
+        print("[+] Conexão com {} estabelecida.\n".format(sock.getsockname()))
     except ConnectionError:
         print("[+] Erro na conexão com o servidor.")
         raise SystemExit
