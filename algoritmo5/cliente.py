@@ -91,6 +91,7 @@ def conectar(PORTA):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
         sock.connect((socket.gethostname(), PORTA))
+        print("[+] Conexão com {} estabelecida.\n".format(sock.getsockname()))
     except ConnectionError:
         print("[+] Erro na conexão com o servidor.")
         raise SystemExit
@@ -156,7 +157,7 @@ def diffie_hellman(p, g, sock):
     resposta = resposta[:-64] # Retira os últimos 64 bytes da mensagem (HMAC)
     resposta = decodificar(resposta, chave_compartilhada)
     print(resposta)
-
+    
 
 def main(porta):
     sock = conectar(porta)

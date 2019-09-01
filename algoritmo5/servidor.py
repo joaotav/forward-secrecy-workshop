@@ -4,7 +4,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
-from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
+# from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
 
 TAM_PAYLOAD = 512
 
@@ -96,7 +96,7 @@ def diffie_hellman(cliente):
     chave_compartilhada = bytes(chave_compartilhada[2:-1], 'utf-8') # Converte a chave de str para bytes
     print("[+] Nova chave gerada: {}".format(chave_compartilhada.decode()))
 
-    mensagem = "[+] Servidor: Recebi a nova chave."
+    mensagem = "[+] Nova chave recebida pelo servidor."
     mensagem = criptografar(mensagem, chave_compartilhada).decode()
     mensagem += gerar_hmac(chave_compartilhada, mensagem.encode())
     mensagem = adicionar_padding(mensagem)
@@ -105,6 +105,7 @@ def diffie_hellman(cliente):
 
 def main(porta):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     sock.bind((socket.gethostname(), porta)) # Define endereço e porta do socket
     sock.listen() # Aguarda conexões no endereço especificado
 
