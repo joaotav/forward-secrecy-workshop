@@ -1,2 +1,2 @@
 # advanced-infosec-properties
-This repository contains scripts that aim to provide examples of security properties such as Perfect Forward Secrecy and Post-Compromise Security.
+Esse repositório contém scripts que objetivam servir como exemplos de uso de propriedades avançadas de segurança da informação, como Perfect Forward Secrecy and Post-Compromise Security.
