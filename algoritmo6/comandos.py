@@ -18,6 +18,7 @@ def derivar_chave(chave):
     return chave
 
 def conectar(PORTA):
+    ''' Estabelece uma conexao com o endereco 127.0.0.1 e a porta especificada '''
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     try:
@@ -30,6 +31,7 @@ def conectar(PORTA):
 
 
 def idvv_init(semente_idvv, chave_idvv):
+    ''' Inicia um iDVV, dada uma semente e uma chave '''
     hash = hashlib.sha256()
     hash.update(semente_idvv)
     hash.update(chave_idvv)
@@ -38,6 +40,7 @@ def idvv_init(semente_idvv, chave_idvv):
 
 
 def idvv_next(semente_idvv, chave_idvv, idvv):
+    ''' Evolui um iDVV, dada uma semente, uma chave e o idvv atual '''
     nova_semente = hashlib.sha256()
     nova_semente.update(semente_idvv)
     nova_semente.update(idvv)
@@ -52,7 +55,7 @@ def idvv_next(semente_idvv, chave_idvv, idvv):
 
 
 def computar_chave_rec(semente_idvv, chave_idvv, chave_mestra):
-    # Computa a chave de recuperação k_rec usando iDVV
+    ''' Computa uma chave de recuperação k_rec usando iDVV '''
     idvv = idvv_init(semente_idvv, chave_idvv)
     idvv, semente_idvv = idvv_next(semente_idvv, chave_idvv, idvv)
     random = idvv
@@ -65,6 +68,7 @@ def computar_chave_rec(semente_idvv, chave_idvv, chave_mestra):
 
 
 def key(destino, nonce, ack_nonce, chave):
+    ''' Envia um comando KEY, avisando que a chave de recuperacao foi gerada com sucesso '''
     payload = ''
     payload += "KEY" + '/' # Comando REC
     payload += str(nonce) + '/'
@@ -76,6 +80,7 @@ def key(destino, nonce, ack_nonce, chave):
 
 
 def rec(destino, nonce, random, chave):
+    ''' Envia um comando REC, solicitando a geracao de uma chave de recuperacao '''
     payload = ''
     payload += "REC" + '/' # Comando REC
     payload += str(nonce) + '/'
@@ -86,6 +91,7 @@ def rec(destino, nonce, random, chave):
 
 
 def rec_ack(destino, nonce, ack_nonce, chave):
+    ''' Envia um comando REC_ACK para notificar o recebimento de um comando REC '''
     payload = ''
     payload += "RCA" + '/' # Comando REC_ACK
     payload += str(nonce) + '/'
@@ -97,39 +103,47 @@ def rec_ack(destino, nonce, ack_nonce, chave):
 
 
 def verificar_hmac(payload, chave):
+    ''' Verifica a integridade do payload recebido atraves do codigo HMAC '''
     payload = remover_padding(payload)
     msg_hmac = payload[-64:] # Os últimos 64 caracteres do payload são o HMAC
     dados = payload[:-64]
+
+    # Computa novamente o HMAC da mensagem
     h = hmac.new(chave, dados.encode(), hashlib.sha256)
-    if h.hexdigest() == msg_hmac:
+    if h.hexdigest() == msg_hmac: # Se o HMAC bate com o codigo recebido
         return 'OK'
     else:
         return 'NOK'
 
 
 def criptografar(mensagem, chave):
+    ''' Criptografa uma string usando uma chave e o algoritmo Fernet '''
     mecanismo = Fernet(chave)
     return mecanismo.encrypt((mensagem).encode())
 
 
 def decodificar(mensagem, chave):
+    ''' Decodifica uma mensagem utilizando uma chave e o algoritmo Fernet '''
     mecanismo = Fernet(chave)
     mensagem = mecanismo.decrypt(mensagem.encode()).decode()
     return mensagem
 
 
 def gerar_hmac(chave, info):
+    ''' Gera um codigo HMAC para permitir a verificacao da integridade de uma string '''
     h = hmac.new(chave, info.encode(), hashlib.sha256)
     return h.hexdigest()
 
 
 def check_nonce(nonce, nonce_recebido):
+    ''' Verifica se o nonce recebido e igual ao nonce esperado '''
     if nonce != nonce_recebido:
         print("[+] Erro na sincronia das mensagens!")
         raise SystemExit
     return
 
 def adicionar_padding(mensagem):
+    ''' Preenche a mensagem com espacos vazios ate atingir o tamanho do payload '''
     encoded_size = len(bytes(mensagem.encode()))
     padding = (TAM_PAYLOAD - encoded_size + len(mensagem))
     # Preenche o final da mensagem com espaços vazios
@@ -137,11 +151,13 @@ def adicionar_padding(mensagem):
 
 
 def remover_padding(mensagem):
+    ''' Remove os espacos vazios ao final da mensagem, recuperando os dados originais '''
     # Remove o preenchimento ao final da mensagem
     return mensagem.decode().rstrip(' ')
 
 
 def extrair_dados(payload, chave):
+    ''' Extrai os dados presentes nos diferentes campos da mensagem recebida '''
     if verificar_hmac(payload, chave) == 'NOK': # Verifica a integridade da mensagem
         print("[+] HMAC incompatível com a mensagem recebida.")
         raise SystemExit
