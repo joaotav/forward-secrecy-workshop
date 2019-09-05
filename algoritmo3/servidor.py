@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import socket, sys
 from collections import defaultdict
-from algoritmo1.comandos_2clientes import *
+from comandos_2clientes import *
 from comandos_genericos import *
 
 def tratar_cliente(socket_cliente, id_cliente, chave, payload, grupos, mensagens_pendentes, nonce_esperado):
@@ -81,6 +81,7 @@ def main():
         nonce_servidor = 0
         cliente, endereco = sock.accept() # Aceita solicitações de conexão
         print(f"[+] Conexão com {endereco} estabelecida.\n")
+        nova_chave = diffie_hellman_servidor(cliente)
         id_cliente = remover_padding(cliente.recv(TAM_PAYLOAD)) # Identifica o ID do cliente que conectou-se
         cliente.send(bytes(adicionar_padding(f"[+] Conexão estabelecida. Bem-vindo {id_cliente}! \n"), 'utf-8'))
         msg_pendentes = verifica_pendentes(id_cliente, mensagens_pendentes) # Verifica se há mensagens pendentes

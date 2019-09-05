@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import socket, hmac, hashlib, sys
+import socket, hmac, hashlib, sys, hkdf
 from cryptography.fernet import Fernet
-from algoritmo1.comandos_2clientes import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
+from comandos_2clientes import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
 from comandos_genericos import *
 
 
 def main():
     nonce_cliente = 0
-    sock = conectar(PORTA, ID_CLIENTE) # Conecta-se com o servidor no IP local e na PORTA escolhida
+    sock = conectar2(PORTA, ID_CLIENTE) # Conecta-se com o servidor no IP local e na PORTA escolhida
     p, g = gerar_parametros()
     diffie_hellman_cliente(p,g,sock)
     sock.send(bytes(adicionar_padding(ID_CLIENTE), 'utf-8')) # Informa o ID do cliente
