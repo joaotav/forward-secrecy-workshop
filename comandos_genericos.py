@@ -260,3 +260,45 @@ def diffie_hellman_servidor(cliente):
     mensagem += gerar_hmac(chave_compartilhada, mensagem.encode())
     mensagem = adicionar_padding(mensagem)
     cliente.send(bytes(mensagem, 'utf-8')) # Responde ao cliente dizendo que recebeu a nova chave
+
+
+def eh_primo(num):
+    ''' Retorna True se num for um número primo, do contrário retorna False '''
+    if num == 1:
+        return False # 1 não é primo
+
+    divisor_maximo = math.floor(math.sqrt(num))
+    for y in range(2, divisor_maximo + 1):
+        if num % y == 0: # Se a operação de módulo retornar 0, num é divisível por y
+            return False # Se num é divisível por y (y != 1 e y != num), num não é primo
+    return True
+
+
+def gerar_parametros():
+    ''' Gera os parâmetros iniciais 'p' e 'g' da troca de chaves de Diffie-Hellman
+        Descrição do processo: https://bit.ly/2YUHXSd'''
+    q = random.randint(100000, 1000000) # Seleciona um valor inicial aleatório
+    r = 1
+
+    while True:
+        if eh_primo(q): # Se o valor for primo, será usado
+            break
+        else:
+            q += 1 # Se não for primo, incrementa e testa novamente
+
+    while True:
+        p = q * r + 1
+        if eh_primo(p):
+            break
+        else:
+            r += 1
+
+    while True:
+        u = random.randint(1,10000)
+        g = (u ** ((p - 1)/q)) % p
+        if g == 1:
+            continue
+        else:
+            break
+
+    return int(p), int(g)

@@ -4,7 +4,7 @@ from comandos import *
 
 TAM_PAYLOAD = 512
 
-
+########### esta em comandos
 def eh_primo(num):
     ''' Retorna True se num for um número primo, do contrário retorna False '''
     if num == 1:
@@ -16,7 +16,7 @@ def eh_primo(num):
             return False # Se num é divisível por y (y != 1 e y != num), num não é primo
     return True
 
-
+########### esta em comandos
 def gerar_parametros():
     ''' Gera os parâmetros iniciais 'p' e 'g' da troca de chaves de Diffie-Hellman
         Descrição do processo: https://bit.ly/2YUHXSd'''
