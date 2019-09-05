@@ -109,7 +109,7 @@ def get(destino, nonce, grupo, chave):
 
 
 def get_ack(destino, nonce, mensagem, grupo, chave):
-   ''' Envia o comando GET_ACK, notificando o recebimento de um comando GET '''
+    ''' Envia o comando GET_ACK, notificando o recebimento de um comando GET '''
     payload = ''
     payload += "GTA" + '/' # Comando PUT_ACK
     payload += str(nonce) + '/'
