@@ -1,62 +1,9 @@
 #!/usr/bin/env python3
 import socket, hmac, hashlib, sys, math, random, hkdf, os, base64
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.fernet import Fernet
-# from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
+
+from comandos import * 
 
 TAM_PAYLOAD = 512
-
-def derivar_chave(chave):
-    ''' Deriva uma chave para ser usada com o algoritmo de criptografia fernet
-    a partir da chave gerada pelo processo de diffie-hellman '''
-    salt = b''
-    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=10000,
-    backend=default_backend())
-    chave = base64.urlsafe_b64encode(kdf.derive(chave))
-
-    return chave
-
-
-def criptografar(mensagem, chave):
-    mecanismo = Fernet(chave)
-    return mecanismo.encrypt((mensagem).encode())
-
-
-def decodificar(mensagem, chave):
-    mecanismo = Fernet(chave)
-    mensagem = mecanismo.decrypt(mensagem.encode()).decode()
-    return mensagem
-
-
-def gerar_hmac(chave, info):
-    h = hmac.new(chave, info, hashlib.sha256)
-    return h.hexdigest()
-
-
-def verificar_hmac(payload, chave):
-    payload = remover_padding(payload)
-    msg_hmac = payload[-64:] # Os últimos 64 caracteres do payload são o HMAC
-    dados = payload[:-64]
-    h = hmac.new(chave, dados.encode(), hashlib.sha256)
-    if h.hexdigest() == msg_hmac:
-        return 'OK'
-    else:
-        return 'NOK'
-
-
-def adicionar_padding(mensagem):
-    encoded_size = len(bytes(mensagem.encode()))
-    padding = (TAM_PAYLOAD - encoded_size + len(mensagem))
-    # Preenche o final da mensagem com espaços vazios
-    return mensagem.ljust(padding, ' ')
-
-
-def remover_padding(mensagem):
-    # Remove o preenchimento ao final da mensagem
-    return mensagem.decode().rstrip(' ')
-
 
 def diffie_hellman(cliente):
     mensagem = cliente.recv(TAM_PAYLOAD)
