@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+import socket, base64, hmac, hashlib
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
+
+TAM_PAYLOAD = 512
 
 def derivar_chave(chave):
     ''' Deriva uma chave para ser usada com o algoritmo de criptografia fernet

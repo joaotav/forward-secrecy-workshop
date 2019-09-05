@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import math, sys, random, hkdf
+import math, sys, random, hkdf, socket, base64
 from comandos import *
+
 TAM_PAYLOAD = 512
 
 
