@@ -8,10 +8,13 @@ Security '''
 TAM_PAYLOAD = 512
 
 def criptografar(mensagem, chave):
+    ''' Criptografa uma string usando uma chave e o algoritmo Fernet '''
     mecanismo = Fernet(chave)
     return mecanismo.encrypt((mensagem).encode())
 
+
 def decodificar(mensagem, chave, comando):
+    ''' Decodifica uma mensagem utilizando uma chave e o algoritmo Fernet '''
     mecanismo = Fernet(chave)
     mensagem = mecanismo.decrypt(mensagem.encode()).decode()
     if comando == 'PUT' or comando == 'GTA':
@@ -24,6 +27,7 @@ def decodificar(mensagem, chave, comando):
 
 
 def verificar_hmac(payload, chave):
+    ''' Verifica a integridade do payload recebido atraves do codigo HMAC '''
     payload = remover_padding(payload)
     msg_hmac = payload[-64:] # Os últimos 64 caracteres do payload são o HMAC
     dados = payload[:-64]
@@ -35,11 +39,13 @@ def verificar_hmac(payload, chave):
 
 
 def gerar_hmac(chave, info):
+    ''' Gera um codigo HMAC para permitir a verificacao da integridade de uma string '''
     h = hmac.new(chave, info.encode(), hashlib.sha256)
     return h.hexdigest()
 
 
 def adicionar_padding(mensagem):
+    ''' Preenche a mensagem com espacos vazios ate atingir o tamanho do payload '''
     encoded_size = len(bytes(mensagem.encode()))
     padding = (TAM_PAYLOAD - encoded_size + len(mensagem))
     # Preenche o final da mensagem com espaços vazios
@@ -47,11 +53,13 @@ def adicionar_padding(mensagem):
 
 
 def remover_padding(mensagem):
+    ''' Remove os espacos vazios ao final da mensagem, recuperando os dados originais '''
     # Remove o preenchimento ao final da mensagem
     return mensagem.decode().rstrip(' ')
 
 
 def put(destino, nonce, grupo, mensagem, chave):
+    ''' Envia o comando PUT, solicitando a publicacao de uma mensagem em um grupo '''
     payload = ''
     payload += "PUT" + '/' # Comando PUT
     payload += str(nonce) + '/'
@@ -66,6 +74,7 @@ def put(destino, nonce, grupo, mensagem, chave):
 
 
 def put_ack(destino, nonce, chave):
+    ''' Envia o comando PUT_ACK, notificando o recebimento do comando PUT '''
     payload = ''
     payload += "PTA" + '/' # Comando PUT_ACK
     payload += str(nonce) + '/'
@@ -77,6 +86,7 @@ def put_ack(destino, nonce, chave):
 
 
 def extrair_dados(payload, chave):
+    ''' Extrai os dados contidos nos diferentes campos da mensagem '''
     if verificar_hmac(payload, chave) == 'NOK': # Verifica a integridade da mensagem
         print("[+] HMAC incompatível com a mensagem recebida.")
         raise SystemExit
@@ -87,6 +97,7 @@ def extrair_dados(payload, chave):
 
 
 def get(destino, nonce, grupo, chave):
+    ''' Envia o comando GET, requisitando mensagens pendentes em um grupo '''
     payload = ''
     payload += "GET" + '/' # Comando GET
     payload += str(nonce) + '/'
@@ -98,6 +109,7 @@ def get(destino, nonce, grupo, chave):
 
 
 def get_ack(destino, nonce, mensagem, grupo, chave):
+   ''' Envia o comando GET_ACK, notificando o recebimento de um comando GET '''
     payload = ''
     payload += "GTA" + '/' # Comando PUT_ACK
     payload += str(nonce) + '/'
@@ -109,6 +121,7 @@ def get_ack(destino, nonce, mensagem, grupo, chave):
 
 
 def notify(destino, nonce, lista_grupos, chave):
+    ''' Envia o comando NOTIFY, que notifica o cliente sobre a existencia de novas mensagens '''
     payload = ''
     payload += "NTF" + '/' # Comando NOTIFY
     payload += str(nonce) + '/'
@@ -119,6 +132,7 @@ def notify(destino, nonce, lista_grupos, chave):
     return
 
 def conectar(PORTA, ID_CLIENTE):
+    ''' Estabelece uma conexao com o servidor de mensagens no endereco local e na porta especificada '''
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Impede que o socket fique ocupado após a execução
     try:
@@ -131,6 +145,7 @@ def conectar(PORTA, ID_CLIENTE):
 
 
 def publicar_mensagem(sock, nonce, grupo, mensagem, chave):
+    ''' Gerencia o processo de publicacao da mensagem e recebimento da confirmacao '''
     put(sock, nonce, 'G1', 'Olá grupo!', chave) # Publica uma mensagem
     resposta = sock.recv(TAM_PAYLOAD)
     comando, nonce_recebido, grupo, mensagem = extrair_dados(resposta, chave)
@@ -146,6 +161,7 @@ def publicar_mensagem(sock, nonce, grupo, mensagem, chave):
 
 
 def recuperar_mensagem(sock, nonce, grupo, chave):
+    ''' Gerencia o processo de requisicao de mensagem e recebimento dos dados '''
     get(sock, nonce, grupo, chave)
     print("[+] Solicitando mensagens... \n")
     resposta = sock.recv(TAM_PAYLOAD)
