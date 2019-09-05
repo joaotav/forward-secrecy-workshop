@@ -46,7 +46,7 @@ def gerar_parametros():
 
     return int(p), int(g)
 
-
+###############################################
 def conectar(PORTA):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket
@@ -105,7 +105,7 @@ def diffie_hellman(p, g, sock):
     resposta = resposta[:-64] # Retira os últimos 64 bytes da mensagem (HMAC)
     resposta = decodificar(resposta, chave_compartilhada)
     print(resposta)
-    
+###################################################
 
 def main(porta):
     sock = conectar(porta)

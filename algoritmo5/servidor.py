@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import socket, hmac, hashlib, sys, math, random, hkdf, os, base64
 
-from comandos import * 
+from comandos import *
 
 TAM_PAYLOAD = 512
 
+############################## DH servidor
 def diffie_hellman(cliente):
     mensagem = cliente.recv(TAM_PAYLOAD)
     mensagem = remover_padding(mensagem)
@@ -48,7 +49,7 @@ def diffie_hellman(cliente):
     mensagem += gerar_hmac(chave_compartilhada, mensagem.encode())
     mensagem = adicionar_padding(mensagem)
     cliente.send(bytes(mensagem, 'utf-8')) # Responde ao cliente dizendo que recebeu a nova chave
-
+##################
 
 def main(porta):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Instancia um socket

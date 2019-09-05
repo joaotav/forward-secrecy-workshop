@@ -167,7 +167,8 @@ def extrair_dados(payload, chave):
         dados = decodificar(dados, chave)
     return comando, int(nonce), dados
 
-def diffie_hellman(p, g, sock):
+### Cliente
+def diffie_hellman_cliente(p, g, sock):
     mensagem = str(p) + '/' + str(g) # mensagem = valor p/valor g
     mensagem = adicionar_padding(mensagem) # Preenche a mensagem até atingir o tamanho do payload
     sock.send(bytes(mensagem, 'utf-8')) # Envia os parâmetros iniciais p e g para o servidor
@@ -214,3 +215,48 @@ def diffie_hellman(p, g, sock):
     resposta = resposta[:-64] # Retira os últimos 64 bytes da mensagem (HMAC)
     resposta = decodificar(resposta, chave_compartilhada)
     print(resposta)
+
+####  DH  servidor
+def diffie_hellman_servidor(cliente):
+    mensagem = cliente.recv(TAM_PAYLOAD)
+    mensagem = remover_padding(mensagem)
+    p, g = mensagem.split('/') # Recupera os valores de p e g
+    p = int(p) # Converte a string recebida para inteiro
+    g = int(g)
+    B = random.randint(1,10000)
+    b = g ** B % p
+
+    mensagem = str(b)
+    mensagem = adicionar_padding(mensagem)
+    cliente.send(bytes(mensagem, 'utf-8'))
+
+    resposta = cliente.recv(TAM_PAYLOAD)
+    resposta = remover_padding(resposta)
+    a = int(resposta) # Armazena o valor 'b' recebido do servidor
+
+    chave_compartilhada = str(a ** B % p)
+    print("[+] Chave compartilhada gerada: {}".format(chave_compartilhada))
+
+    # Deriva uma chave que possa ser usada pelo algoritmo de criptografia
+    chave_compartilhada = derivar_chave(bytes(chave_compartilhada, 'utf-8'))
+    print(f"[+] Chave derivada: {chave_compartilhada.decode()}")
+
+    nova_chave = cliente.recv(TAM_PAYLOAD) # Recebe do cliente a nova chave gerada com hkdf
+
+    # Verifica a integridade dos dados usando HMAC
+    if verificar_hmac(nova_chave, chave_compartilhada) == 'NOK':
+        print("[+] O HMAC da mensagem recebida não corresponde aos dados.")
+        raise SystemExit
+
+    nova_chave = remover_padding(nova_chave)
+    nova_chave = nova_chave[:-64] # Retira os últimos 64 bytes da mensagem (HMAC)
+    chave_compartilhada = decodificar(nova_chave, chave_compartilhada)
+
+    chave_compartilhada = bytes(chave_compartilhada[2:-1], 'utf-8') # Converte a chave de str para bytes
+    print("[+] Nova chave gerada: {}".format(chave_compartilhada.decode()))
+
+    mensagem = "[+] Nova chave recebida pelo servidor."
+    mensagem = criptografar(mensagem, chave_compartilhada).decode()
+    mensagem += gerar_hmac(chave_compartilhada, mensagem.encode())
+    mensagem = adicionar_padding(mensagem)
+    cliente.send(bytes(mensagem, 'utf-8')) # Responde ao cliente dizendo que recebeu a nova chave
