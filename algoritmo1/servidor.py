@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import socket, sys
 from collections import defaultdict
-from comandos import *
+from comandos_2clientes import *
 
 def tratar_cliente(socket_cliente, id_cliente, chave, payload, grupos, mensagens_pendentes, nonce_esperado):
     comando, nonce_recebido, grupo, mensagem = extrair_dados(payload, chave)

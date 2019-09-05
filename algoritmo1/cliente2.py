@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import socket, hmac, hashlib, sys
 from cryptography.fernet import Fernet
-from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
+from comandos_2clientes import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
 
 def main():
     nonce_cliente = 0
