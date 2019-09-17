@@ -1,30 +1,18 @@
 #!/usr/bin/env python3
-import socket, sys
+import socket, hmac, hashlib, sys
+from cryptography.fernet import Fernet
 from comandos import * # Importa os comandos PUT, PUT_ACK, GET, GET_ACK, e NOTIFY
-
-''' Algoritmo 3:
-    Geração e atualização de chaves secretas de sessão '''
 
 def main():
     nonce_cliente = 0
-    sock = conectar(PORTA) # Conecta-se com o servidor no IP local e na PORTA escolhida
-
-    p, g = gerar_parametros() # Prepara os parâmetros para a troca de chaves de Diffie-Hellman
-    chave_longa_duracao = solicitar_diffie_hellman(p, g, sock) # Solicita a geração de uma chave através do processo de Diffie-Hellman
-
+    sock = conectar(PORTA, ID_CLIENTE) # Conecta-se com o servidor no IP local e na PORTA escolhida
     sock.send(bytes(adicionar_padding(ID_CLIENTE), 'utf-8')) # Informa o ID do cliente
     resposta = remover_padding(sock.recv(TAM_PAYLOAD)) # Recebe a resposta do servidor
     print(resposta)
-
-    mensagem = sock.recv(TAM_PAYLOAD) # Recebe informação sobre mensagens pendentes
-    comando, nonce, grupo, mensagem = extrair_dados(mensagem, chave_longa_duracao) # Recebe a resposta do servidor
+    comando, nonce, grupo, mensagem = extrair_dados(sock.recv(TAM_PAYLOAD), CHAVE_SECRETA) # Recebe a resposta do servidor
     print(mensagem)
-
-    chave_longa_duracao = atualizar_chave(chave_longa_duracao)
-
-    recuperar_mensagem(sock, nonce_cliente, 'G1', chave_longa_duracao) # Recuperar mensagens do grupo G1
+    recuperar_mensagem(sock, nonce_cliente, 'G1', CHAVE_SECRETA) # Recuperar mensagens do grupo G1
     sock.close()
-
     print("[+] Conexão com o servidor encerrada.")
 
 if len(sys.argv) < 2:
@@ -40,7 +28,7 @@ except ValueError:
 
 
 TAM_PAYLOAD = 512
-ID_CLIENTE = 'cliente2'
+ID_CLIENTE = 'Bob'
 CHAVE_SECRETA = b'wqC0d_A0tbZPlFlAdHbAupEXyqkGSbJcoppU28tzA_g='
 
 
