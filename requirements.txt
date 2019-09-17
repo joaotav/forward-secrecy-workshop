@@ -1,0 +1,2 @@
+cryptography==2.1.4
+hkdf==0.0.3
